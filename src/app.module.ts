@@ -6,9 +6,27 @@ import { CategoryModule } from './category/category.module';
 import { CityModule } from './city/city.module';
 import { RadioModule } from './radio/radio.module';
 import { AuthModule } from './auth/auth.module';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { Category } from './category/entities/category.entity';
 
 @Module({
-  imports: [UserModule, CategoryModule, CityModule, RadioModule, AuthModule],
+  imports: [
+    UserModule,
+    CategoryModule,
+    CityModule,
+    RadioModule,
+    AuthModule,
+    TypeOrmModule.forRoot({
+      type: 'postgres',
+      host: 'localhost',
+      port: 5432,
+      username: 'postgres',
+      password: 'zodiac',
+      database: 'radios-nestjs',
+      entities: [Category],
+      synchronize: true,
+    }),
+  ],
   controllers: [AppController],
   providers: [AppService],
 })
