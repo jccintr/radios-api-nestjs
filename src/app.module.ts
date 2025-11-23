@@ -8,6 +8,7 @@ import { RadioModule } from './radio/radio.module';
 import { AuthModule } from './auth/auth.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Category } from './category/entities/category.entity';
+import { City } from './city/entities/city.entity';
 
 @Module({
   imports: [
@@ -23,7 +24,7 @@ import { Category } from './category/entities/category.entity';
       username: 'postgres',
       password: 'zodiac',
       database: 'radios-nestjs',
-      entities: [Category],
+      entities: [Category, City],
       synchronize: true,
     }),
   ],

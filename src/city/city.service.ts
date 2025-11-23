@@ -1,26 +1,64 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateCityDto } from './dto/create-city.dto';
 import { UpdateCityDto } from './dto/update-city.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { City } from './entities/city.entity';
 
 @Injectable()
 export class CityService {
+  constructor(
+    @InjectRepository(City)
+    private repository: Repository<City>,
+  ) {}
+
   create(createCityDto: CreateCityDto) {
-    return 'This action adds a new city';
+    const newCity = this.repository.create();
+    newCity.name = createCityDto.name;
+    newCity.uf = createCityDto.uf.toUpperCase();
+    const citySaved = this.repository.save(newCity);
+    return citySaved;
   }
 
-  findAll() {
-    return `This action returns all city`;
+  async findAll() {
+    const cities = await this.repository.find();
+    return cities;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} city`;
+  async findOne(id: number) {
+    const city = await this.repository.findOne({
+      where: { id },
+    });
+    if (!city) {
+      throw new NotFoundException(`City with ID ${id} not found`);
+    }
+    return city;
   }
 
-  update(id: number, updateCityDto: UpdateCityDto) {
-    return `This action updates a #${id} city`;
+  async update(id: number, updateCityDto: UpdateCityDto) {
+    const city = await this.repository.findOne({
+      where: { id },
+    });
+    if (!city) {
+      throw new NotFoundException(`City with ID ${id} not found`);
+    }
+    if (updateCityDto.name) {
+      city.name = updateCityDto.name;
+    }
+    if (updateCityDto.uf) {
+      city.uf = updateCityDto.uf?.toUpperCase();
+    }
+    const updatedCity = await this.repository.save(city);
+    return updatedCity;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} city`;
+  async remove(id: number) {
+    const city = await this.repository.findOne({
+      where: { id },
+    });
+    if (!city) {
+      throw new NotFoundException(`City with ID ${id} not found`);
+    }
+    await this.repository.remove(city);
   }
 }
