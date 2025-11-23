@@ -7,7 +7,6 @@ import { Repository } from 'typeorm';
 
 @Injectable()
 export class CategoryService {
-
   constructor(
     @InjectRepository(Category)
     private repository: Repository<Category>,
@@ -21,7 +20,7 @@ export class CategoryService {
   }
 
   async findAll() {
-    const categories = await this.repository.find();
+    const categories = await this.repository.find({ order: { name: 'ASC' } });
     return categories;
   }
 

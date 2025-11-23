@@ -2,9 +2,11 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { Radio } from 'src/radio/entities/radio.entity';
 
 export enum Ufs {
   AC = 'AC',
@@ -44,16 +46,11 @@ export class City {
   @Column()
   name: string;
 
-/*
-  @Column({
-    type: 'enum',
-    enum: Ufs,
-  })
-  uf: Ufs;
-*/
-
   @Column({ type: 'varchar', length: 2 })
   uf: string;
+
+  @OneToMany(() => Radio, (radio) => radio.city)
+  radios: Radio[];
 
   @CreateDateColumn()
   createdDate: Date;
