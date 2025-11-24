@@ -52,15 +52,22 @@ export class RadioService {
           `Categoria com ID ${category.id} não encontrada`,
         );
       }
-      newRadio.categories.push(categoryExists);
+      if (!newRadio.categories.some((cat) => cat.id === category.id)) {
+        newRadio.categories.push(categoryExists);
+      }
     }
     const radioSaved = this.repository.save(newRadio);
     return radioSaved;
   }
+  /*
+if (!newRadio.categories.some(cat => cat.id === category.id)) {
+  newRadio.categories.push(novaCategoria);
+}
+  */
 
   async findAll() {
     const radios = await this.repository.find({
-      relations: ['city'],
+      relations: ['city', 'categories'],
       select: {
         id: true,
         name: true,
@@ -120,7 +127,9 @@ export class RadioService {
             `Categoria com ID ${category.id} não encontrada`,
           );
         }
-        radio.categories.push(categoryExists);
+        if (!radio.categories.some((cat) => cat.id === category.id)) {
+          radio.categories.push(categoryExists);
+        }
       }
     }
     if (updateRadioDto.name) {
