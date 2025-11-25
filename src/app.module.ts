@@ -10,23 +10,31 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Category } from './category/entities/category.entity';
 import { City } from './city/entities/city.entity';
 import { Radio } from './radio/entities/radio.entity';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
     UserModule,
     CategoryModule,
     CityModule,
     RadioModule,
     AuthModule,
-    TypeOrmModule.forRoot({
-      type: 'postgres',
-      host: 'localhost',
-      port: 5432,
-      username: 'postgres',
-      password: 'zodiac',
-      database: 'radios-nestjs',
-      entities: [Category, City, Radio],
-      synchronize: true,
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        type: 'postgres',
+        host: config.get<string>('DB_HOST'),
+        port: config.get<number>('DB_PORT'),
+        username: config.get<string>('DB_USER'),
+        password: config.get<string>('DB_PASS'),
+        database: config.get<string>('DB_NAME'),
+        entities: [Category, City, Radio],
+        synchronize: true,
+      }),
     }),
   ],
   controllers: [AppController],
