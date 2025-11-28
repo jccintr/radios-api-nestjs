@@ -13,6 +13,7 @@ import { Radio } from './radio/entities/radio.entity';
 import { User } from './user/entities/user.entity';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ListModule } from './list/list.module';
+import { ListItemModule } from './list-item/list-item.module';
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { ListModule } from './list/list.module';
       }),
     }),
     ListModule,
+    ListItemModule,
   ],
   controllers: [AppController],
   providers: [AppService],
