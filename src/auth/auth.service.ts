@@ -31,8 +31,7 @@ export class AuthService {
         'Email already in use! Please try with a diff email',
       );
     }
-    const salt = await bcrypt.genSalt();
-    const passwordHash = await bcrypt.hash(registerDto.password, salt);
+    const passwordHash = await this.hashPassword(registerDto.password);
     const newUser = this.usersRepository.create({
       email: registerDto.email,
       name: registerDto.name,
@@ -66,5 +65,10 @@ export class AuthService {
     hashedPassword: string,
   ): Promise<boolean> {
     return bcrypt.compare(plainPassword, hashedPassword);
+  }
+
+  private async hashPassword(password: string): Promise<string> {
+    const salt = await bcrypt.genSalt();
+    return await bcrypt.hash(password, salt);
   }
 }

@@ -12,6 +12,7 @@ import { City } from './city/entities/city.entity';
 import { Radio } from './radio/entities/radio.entity';
 import { User } from './user/entities/user.entity';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ListModule } from './list/list.module';
 
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
         synchronize: true,
       }),
     }),
+    ListModule,
   ],
   controllers: [AppController],
   providers: [AppService],

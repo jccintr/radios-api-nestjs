@@ -12,11 +12,18 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
     ConfigModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
-      useFactory: (configService: ConfigService) => ({
-        global: true,
-        secret: configService.get<string>('JWT_SECRET'),
-        signOptions: { expiresIn: '24h' },
-      }),
+      useFactory: (configService: ConfigService) => {
+        const expires = configService.get<string>('TOKEN_EXPIRES') || '30m';
+        const secret = configService.get<string>('JWT_SECRET');
+        return {
+          global: true,
+          secret: secret,
+          signOptions: {
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+            expiresIn: expires as any,
+          },
+        };
+      },
       inject: [ConfigService],
     }),
   ],
