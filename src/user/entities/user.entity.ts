@@ -2,9 +2,11 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { List } from 'src/list/entities/list.entity';
 
 export enum Role {
   USER = 'user',
@@ -31,6 +33,10 @@ export class User {
     default: Role.USER,
   })
   role: Role;
+
+
+  @OneToMany(() => List, (list) => list.user)
+  lists: List[];
 
   @CreateDateColumn()
   createdAt: Date;

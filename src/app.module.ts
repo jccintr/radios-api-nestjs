@@ -11,6 +11,8 @@ import { Category } from './category/entities/category.entity';
 import { City } from './city/entities/city.entity';
 import { Radio } from './radio/entities/radio.entity';
 import { User } from './user/entities/user.entity';
+import { List } from './list/entities/list.entity';
+import { ListItem } from './list-item/entities/list-item.entity';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ListModule } from './list/list.module';
 import { ListItemModule } from './list-item/list-item.module';
@@ -35,7 +37,7 @@ import { ListItemModule } from './list-item/list-item.module';
         username: config.get<string>('DB_USER'),
         password: config.get<string>('DB_PASS'),
         database: config.get<string>('DB_NAME'),
-        entities: [Category, City, Radio, User],
+        entities: [Category, City, Radio, List, User, ListItem],
         synchronize: true,
       }),
     }),

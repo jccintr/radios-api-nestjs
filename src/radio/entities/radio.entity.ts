@@ -5,11 +5,13 @@ import {
   JoinTable,
   ManyToMany,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { City } from 'src/city/entities/city.entity';
 import { Category } from 'src/category/entities/category.entity';
+import { ListItem } from 'src/list-item/entities/list-item.entity';
 
 @Entity()
 export class Radio {
@@ -37,6 +39,9 @@ export class Radio {
   @ManyToMany(() => Category)
   @JoinTable()
   categories: Category[];
+
+  @OneToMany(() => ListItem, (listItem) => listItem.list)
+  listItems: ListItem[];
 
   @CreateDateColumn()
   createdDate: Date;
