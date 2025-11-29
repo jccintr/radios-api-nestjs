@@ -25,6 +25,7 @@ export class AuthController {
   }
 
   @Post('login')
+  @HttpCode(HttpStatus.OK)
   login(@Body(ValidationPipe) loginDto: LoginDto) {
     return this.authService.login(loginDto);
   }
