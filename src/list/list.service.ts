@@ -1,10 +1,15 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateListDto } from './dto/create-list.dto';
 import { UpdateListDto } from './dto/update-list.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { List } from './entities/list.entity';
-import { User } from 'src/user/entities/user.entity';
+import { Role, User } from 'src/user/entities/user.entity';
+import { ListResponseDto, UserResponseDto } from './dto/list-response.dto';
 
 @Injectable()
 export class ListService {
@@ -13,16 +18,27 @@ export class ListService {
     private repository: Repository<List>,
   ) {}
 
-  async create(createListDto: CreateListDto, user: User) {
+  async create(
+    createListDto: CreateListDto,
+    user: User,
+  ): Promise<ListResponseDto> {
     let newList = this.repository.create();
     newList.name = createListDto.name;
     newList.user = user;
     newList = await this.repository.save(newList);
-    return newList;
+    const userDto: UserResponseDto = new UserResponseDto(user.id, user.name);
+    const listResponseDTO: ListResponseDto = new ListResponseDto(
+      newList.id,
+      newList.name,
+      userDto,
+      newList.createdAt,
+      newList.updatedAt,
+    );
+    return listResponseDTO;
   }
 
   async findAll() {
-    const lists = await this.repository.find({
+    return await this.repository.find({
       relations: ['user'],
       order: { name: 'ASC' },
       select: {
@@ -33,14 +49,28 @@ export class ListService {
         user: {
           id: true,
           name: true,
-          role: true,
         },
       },
     });
-    return lists;
   }
 
-  async findOne(id: number) {
+  async findAllByUser(user: User) {
+    return this.repository.find({
+      where: { user: { id: user.id } },
+      select: {
+        id: true,
+        name: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+      order: {
+        name: 'ASC',
+      },
+    });
+  }
+
+  async findOne(id: number, user: User) {
+    // somente podem acessar admin ou owner
     const list = await this.repository.findOne({
       where: { id },
       relations: ['user'],
@@ -59,14 +89,58 @@ export class ListService {
     if (!list) {
       throw new NotFoundException(`List with ID ${id} not found`);
     }
+
+    if (user.id !== list.user.id && user.role !== Role.ADMIN) {
+      throw new ForbiddenException(`User is not owner of List with ID ${id}`);
+    }
     return list;
   }
 
-  update(id: number, updateListDto: UpdateListDto) {
-    return `This action updates a #${id} list`;
+  async update(id: number, updateListDto: UpdateListDto, user: User) {
+    let list = await this.repository.findOne({
+      where: { id },
+      relations: ['user'],
+      select: {
+        id: true,
+        name: true,
+        createdAt: true,
+        updatedAt: true,
+        user: {
+          id: true,
+          name: true,
+        },
+      },
+    });
+    if (!list) {
+      throw new NotFoundException(`List with ID ${id} not found`);
+    }
+    if (user.id !== list.user.id) {
+      throw new ForbiddenException(`User is not owner of List with ID ${id}`);
+    }
+    if (updateListDto.name) {
+      list.name = updateListDto.name;
+    }
+    list = await this.repository.save(list);
+    return list;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} list`;
+  async remove(id: number, user: User) {
+    const list = await this.repository.findOne({
+      where: { id },
+      relations: ['user'],
+      select: {
+        id: true,
+        user: {
+          id: true,
+        },
+      },
+    });
+    if (!list) {
+      throw new NotFoundException(`List with ID ${id} not found`);
+    }
+    if (user.id !== list.user.id) {
+      throw new ForbiddenException(`User is not owner of List with ID ${id}`);
+    }
+    await this.repository.remove(list);
   }
 }

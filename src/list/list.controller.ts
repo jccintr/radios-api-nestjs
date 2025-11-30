@@ -9,6 +9,8 @@ import {
   UseGuards,
   ValidationPipe,
   Request,
+  HttpCode,
+  HttpStatus,
 } from '@nestjs/common';
 import { ListService } from './list.service';
 import { CreateListDto } from './dto/create-list.dto';
@@ -21,9 +23,11 @@ export class ListController {
 
   @UseGuards(AuthGuard)
   @Post()
-  async create(@Body() createListDto: CreateListDto, @Request() req) {
+  async create(
+    @Body(ValidationPipe) createListDto: CreateListDto,
+    @Request() req,
+  ) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
-    console.log(req.user);
     return await this.listService.create(createListDto, req.user);
   }
 
@@ -33,18 +37,34 @@ export class ListController {
     return await this.listService.findAll();
   }
 
+  @UseGuards(AuthGuard)
+  @Get('user')
+  async findAllByUser(@Request() req) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
+    return await this.listService.findAllByUser(req.user);
+  }
+
+  @UseGuards(AuthGuard)
   @Get(':id')
-  async findOne(@Param('id') id: string) {
-    return await this.listService.findOne(+id);
+  async findOne(@Param('id') id: string, @Request() req) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
+    return await this.listService.findOne(+id, req.user);
   }
 
+  @UseGuards(AuthGuard)
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateListDto: UpdateListDto) {
-    return this.listService.update(+id, updateListDto);
+  async update(
+    @Param('id') id: string,
+    @Body(ValidationPipe) updateListDto: UpdateListDto,
+    @Request() req,
+  ) {
+    return await this.listService.update(+id, updateListDto,req.user);
   }
 
+  @UseGuards(AuthGuard)
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.listService.remove(+id);
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async remove(@Param('id') id: string, @Request() req) {
+    return await this.listService.remove(+id, req.user);
   }
 }

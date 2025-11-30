@@ -34,7 +34,6 @@ export class User {
   })
   role: Role;
 
-
   @OneToMany(() => List, (list) => list.user)
   lists: List[];
 
