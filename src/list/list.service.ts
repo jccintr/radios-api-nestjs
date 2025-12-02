@@ -57,6 +57,7 @@ export class ListService {
   async findAllByUser(user: User) {
     return this.repository.find({
       where: { user: { id: user.id } },
+      relations: ['listItems'],
       select: {
         id: true,
         name: true,
@@ -91,7 +92,9 @@ export class ListService {
     }
 
     if (user.id !== list.user.id && user.role !== Role.ADMIN) {
-      throw new ForbiddenException(`User is not owner of List with ID ${id}`);
+      throw new ForbiddenException(
+        `User is not owner of List with ID ${id} or has Admin Role`,
+      );
     }
     return list;
   }
@@ -132,6 +135,7 @@ export class ListService {
         id: true,
         user: {
           id: true,
+          role: true,
         },
       },
     });
@@ -140,6 +144,11 @@ export class ListService {
     }
     if (user.id !== list.user.id) {
       throw new ForbiddenException(`User is not owner of List with ID ${id}`);
+    }
+    if (user.id !== list.user.id && user.role !== Role.ADMIN) {
+      throw new ForbiddenException(
+        `User is not owner of List with ID ${id} or has Admin Role`,
+      );
     }
     await this.repository.remove(list);
   }

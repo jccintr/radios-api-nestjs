@@ -7,7 +7,7 @@ import { City } from 'src/city/entities/city.entity';
 import { Category } from 'src/category/entities/category.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Radio, City,Category])],
+  imports: [TypeOrmModule.forFeature([Radio, City, Category])],
   controllers: [RadioController],
   providers: [RadioService],
 })

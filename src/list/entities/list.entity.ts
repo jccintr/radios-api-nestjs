@@ -24,8 +24,6 @@ export class List {
   @ManyToOne(() => User, (user) => user.lists)
   user: User;
 
-
-
   @CreateDateColumn()
   createdAt: Date;
 

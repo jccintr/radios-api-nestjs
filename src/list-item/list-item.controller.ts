@@ -1,32 +1,28 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Param,
+  Delete,
+  UseGuards,
+  Request,
+} from '@nestjs/common';
 import { ListItemService } from './list-item.service';
 import { CreateListItemDto } from './dto/create-list-item.dto';
-import { UpdateListItemDto } from './dto/update-list-item.dto';
+import { AuthGuard } from 'src/auth/auth.guard';
 
-@Controller('list-item')
+@Controller('items')
 export class ListItemController {
   constructor(private readonly listItemService: ListItemService) {}
 
+  @UseGuards(AuthGuard)
   @Post()
-  create(@Body() createListItemDto: CreateListItemDto) {
-    return this.listItemService.create(createListItemDto);
+  async create(@Body() createListItemDto: CreateListItemDto, @Request() req) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
+    return await this.listItemService.create(createListItemDto, req.user);
   }
 
-  @Get()
-  findAll() {
-    return this.listItemService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.listItemService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateListItemDto: UpdateListItemDto) {
-    return this.listItemService.update(+id, updateListItemDto);
-  }
-
+  @UseGuards(AuthGuard)
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.listItemService.remove(+id);
