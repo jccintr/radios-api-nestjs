@@ -42,7 +42,7 @@ export class ListService {
       throw new ForbiddenException();
     }
     return await this.repository.find({
-      relations: ['user', 'listItems.radio'],
+      relations: ['user'],
       order: { name: 'ASC' },
       select: {
         id: true,
@@ -60,7 +60,6 @@ export class ListService {
   async findAllByUser(user: User) {
     return this.repository.find({
       where: { user: { id: user.id } },
-      relations: ['listItems.radio'],
       select: {
         id: true,
         name: true,
@@ -77,7 +76,7 @@ export class ListService {
     // somente podem acessar admin ou owner
     const list = await this.repository.findOne({
       where: { id },
-      relations: ['user'],
+      relations: ['user', 'listItems.radio'],
       select: {
         id: true,
         name: true,

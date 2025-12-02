@@ -74,6 +74,38 @@ export class ListItemService {
   }
 
   async remove(id: number, user: User) {
-    return `This action removes a #${id} listItem`;
+    // verificar se o itemList existe
+    const listItem = await this.repository.findOne({
+      where: { id },
+      relations: ['list'],
+      select: {
+        id: true,
+        list: { id: true },
+      },
+    });
+    if (!listItem) {
+      throw new NotFoundException(`ListItem with ID ${id} not found`);
+    }
+    // recupera a lista para identificar o proprietario
+    const list = await this.listRepository.findOne({
+      where: { id: listItem.list.id },
+      relations: ['user'],
+      select: {
+        id: true,
+        user: {
+          id: true,
+        },
+      },
+    });
+    if (!list) {
+      throw new NotFoundException(`List with ID ${id} not found`);
+    }
+    // verificar se o auth é dono da lista
+    if (user.id !== list.user.id) {
+      throw new ForbiddenException(
+        `User is not owner of List with ID ${list.id}`,
+      );
+    }
+    await this.repository.remove(listItem);
   }
 }
