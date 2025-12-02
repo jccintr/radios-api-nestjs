@@ -1,4 +1,5 @@
 import {
+  ConflictException,
   ForbiddenException,
   Injectable,
   NotFoundException,
@@ -41,7 +42,6 @@ export class ListItemService {
         `List with ID ${createListItemDto.listId} not found`,
       );
     }
- 
     // verificar se o auth é dono da lista
     if (user.id !== list.user.id) {
       throw new ForbiddenException(
@@ -60,11 +60,12 @@ export class ListItemService {
     // verificar se a rádio já não está na lista
     for (const item of list.listItems) {
       if (item.radio.id === createListItemDto.radioId) {
-        throw new UnprocessableEntityException(
+        throw new ConflictException(
           `Radio with ID ${createListItemDto.radioId} already is in the list`,
         );
       }
     }
+    // salva o novo list item
     let newListItem = this.repository.create();
     newListItem.list = { id: createListItemDto.listId } as List;
     newListItem.radio = { id: createListItemDto.radioId } as Radio;
@@ -72,7 +73,7 @@ export class ListItemService {
     return newListItem;
   }
 
-  remove(id: number) {
+  async remove(id: number, user: User) {
     return `This action removes a #${id} listItem`;
   }
 }

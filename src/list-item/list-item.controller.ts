@@ -6,6 +6,9 @@ import {
   Delete,
   UseGuards,
   Request,
+  ValidationPipe,
+  HttpCode,
+  HttpStatus,
 } from '@nestjs/common';
 import { ListItemService } from './list-item.service';
 import { CreateListItemDto } from './dto/create-list-item.dto';
@@ -17,14 +20,19 @@ export class ListItemController {
 
   @UseGuards(AuthGuard)
   @Post()
-  async create(@Body() createListItemDto: CreateListItemDto, @Request() req) {
+  async create(
+    @Body(ValidationPipe) createListItemDto: CreateListItemDto,
+    @Request() req,
+  ) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
     return await this.listItemService.create(createListItemDto, req.user);
   }
 
   @UseGuards(AuthGuard)
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.listItemService.remove(+id);
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async remove(@Param('id') id: string, @Request() req) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-argument
+    return this.listItemService.remove(+id, req.user);
   }
 }

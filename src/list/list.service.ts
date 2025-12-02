@@ -37,9 +37,12 @@ export class ListService {
     return listResponseDTO;
   }
 
-  async findAll() {
+  async findAll(user: User) {
+    if (user.role !== Role.ADMIN) {
+      throw new ForbiddenException();
+    }
     return await this.repository.find({
-      relations: ['user'],
+      relations: ['user', 'listItems.radio'],
       order: { name: 'ASC' },
       select: {
         id: true,
@@ -57,7 +60,7 @@ export class ListService {
   async findAllByUser(user: User) {
     return this.repository.find({
       where: { user: { id: user.id } },
-      relations: ['listItems'],
+      relations: ['listItems.radio'],
       select: {
         id: true,
         name: true,

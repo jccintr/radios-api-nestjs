@@ -33,8 +33,9 @@ export class ListController {
 
   @UseGuards(AuthGuard)
   @Get()
-  async findAll() {
-    return await this.listService.findAll();
+  async findAll(@Request() req) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
+    return await this.listService.findAll(req.user);
   }
 
   @UseGuards(AuthGuard)
