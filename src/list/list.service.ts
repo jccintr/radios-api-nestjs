@@ -8,6 +8,7 @@ import { UpdateListDto } from './dto/update-list.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { List } from './entities/list.entity';
+import { ListItem } from 'src/list-item/entities/list-item.entity';
 import { Role, User } from 'src/user/entities/user.entity';
 import { ListResponseDto, UserResponseDto } from './dto/list-response.dto';
 
@@ -16,6 +17,8 @@ export class ListService {
   constructor(
     @InjectRepository(List)
     private repository: Repository<List>,
+    @InjectRepository(ListItem)
+    private listItemRepository: Repository<ListItem>,
   ) {}
 
   async create(
@@ -132,7 +135,7 @@ export class ListService {
   async remove(id: number, user: User) {
     const list = await this.repository.findOne({
       where: { id },
-      relations: ['user'],
+      relations: ['user', 'listItems'],
       select: {
         id: true,
         user: {
@@ -151,6 +154,22 @@ export class ListService {
       throw new ForbiddenException(
         `User is not owner of List with ID ${id} or has Admin Role`,
       );
+    }
+    //primeiro remove os items da lista
+    const itemsToRemove: ListItem[] = [];
+
+    for (const item of list.listItems) {
+      const itemToRemove = await this.listItemRepository.findOne({
+        where: { id: item.id },
+      });
+
+      if (itemToRemove) {
+        itemsToRemove.push(itemToRemove);
+      }
+    }
+
+    if (itemsToRemove.length > 0) {
+      await this.listItemRepository.remove(itemsToRemove);
     }
     await this.repository.remove(list);
   }
