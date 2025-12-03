@@ -59,11 +59,7 @@ export class RadioService {
     const radioSaved = this.repository.save(newRadio);
     return radioSaved;
   }
-  /*
-if (!newRadio.categories.some(cat => cat.id === category.id)) {
-  newRadio.categories.push(novaCategoria);
-}
-  */
+ 
 
   async findAll() {
     const radios = await this.repository.find({
@@ -89,6 +85,18 @@ if (!newRadio.categories.some(cat => cat.id === category.id)) {
     const radio = await this.repository.findOne({
       where: { id },
       relations: ['city', 'categories'],
+      select: {
+        id: true,
+        name: true,
+        shortName: true,
+        hsl: true,
+        streamUrl: true,
+        imageUrl: true,
+        city: {
+          name: true,
+          uf: true,
+        },
+      },
     });
     if (!radio) {
       throw new NotFoundException(`Radio with ID ${id} not found`);

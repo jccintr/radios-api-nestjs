@@ -9,16 +9,23 @@ import {
   HttpCode,
   HttpStatus,
   ValidationPipe,
+  UseGuards,
 } from '@nestjs/common';
 import { CategoryService } from './category.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
+import { Roles } from 'src/auth/roles.decorator';
+import { RolesGuard } from 'src/auth/roles.guard';
+import { AuthGuard } from 'src/auth/auth.guard';
+import { Role } from 'src/user/entities/user.entity';
 
 @Controller('categories')
 export class CategoryController {
   constructor(private readonly categoryService: CategoryService) {}
 
   @Post()
+  @Roles(Role.ADMIN)
+  @UseGuards(AuthGuard, RolesGuard)
   create(@Body(ValidationPipe) createCategoryDto: CreateCategoryDto) {
     return this.categoryService.create(createCategoryDto);
   }
